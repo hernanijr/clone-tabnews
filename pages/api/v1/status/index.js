@@ -11,18 +11,18 @@ async function status(request, response) {
     databaseMaxConnectionsResult.rows[0].max_connections;
 
   const databaseOpenedConnectionsResult = await database.query(
-    `SHOW reserved_connections;`
+    `SELECT COUNT(*)::int FROM pg_stat_activity WHERE datname = 'local_db';`
   );
   const databaseOpenedConnectionsValue =
-    databaseOpenedConnectionsResult.rows[0].reserved_connections;
+    databaseOpenedConnectionsResult.rows[0].count;
 
   response.status(200).json({
     updated_at: updatedAt,
     dependencies: {
       database: {
         version: databaseVersionValue,
+        max_connections: parseInt(databaseMaxConnectionsValue),
         opened_connections: databaseOpenedConnectionsValue,
-        max_connections: databaseMaxConnectionsValue,
       },
     },
   });
